@@ -25,22 +25,30 @@ class Network:
 
     def feedforward(self, a):
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(a, w) + b)
+            a = sigmoid(np.dot(w, a) + b)
         return a
 
-    def SGD(self, training_data, batch_size, epochs, training_rate):
+    def SGD(self, training_data, batch_size, epochs, training_rate, test_data=None):
         """we gon be doing a lot of stuff"""
+        if test_data:
+            print("Network initial performance: {0}/{1} right!"
+                .format(self.evaluate(test_data), len(test_data)))
+
         n = len(training_data)
         for j in range(epochs):
             random.shuffle(training_data)
             batches = [training_data[k:k+batch_size] for k in range(0, n, batch_size)]
             for batch in batches:
                 self.update_batch(batch, training_rate)
-            print("Epoch {} completed".format(j))
+            print("Epoch {} completed".format(j + 1))
+
+        if test_data:
+            print("How does our network perform now? {0}/{1} right!" 
+                .format(self.evaluate(test_data), len(test_data)))
 
     def update_batch(self, batch, training_rate):
-        new_biases = [np.zeros(b) for b in self.biases] #not really new wights and biases, but the nudges after back prop
-        new_weights = [np.zeros(w) for w in self.weights]
+        new_biases = [np.zeros(b.shape) for b in self.biases]
+        new_weights = [np.zeros(w.shape) for w in self.weights]
         for x, y in batch:
             temp_biases, temp_weights = self.backprop(x, y)
             new_biases = [nb +tb for nb, tb in zip(new_biases, temp_biases)]
@@ -56,21 +64,26 @@ class Network:
         zs = []
         for b , w in zip(self.biases, self.weights):
             z = np.dot(w, activation) + b
-            zs.append
+            zs.append(z)
             activation = sigmoid(z)
             activations.append(activation)
         
-        delta = (activations - y) * sigmoid_prime(zs[-1])
+        delta = (activations[-1] - y) * sigmoid_prime(zs[-1])
         delta_b[-1] = delta
         delta_w[-1] = np.dot(delta, activations[-2].transpose())
 
         for layer in range(2, self.layers):
             z = zs[-layer]
             sp = sigmoid_prime(z)
-            delta = np.dot(delta, self.weights[-layer + 1].transpose()) * sp
+            delta = np.dot(self.weights[-layer + 1].transpose(), delta) * sp
             delta_b[-layer] = delta
             delta_w[-layer] = np.dot(delta, activations[-layer - 1].transpose())
         return (delta_b ,delta_w)
+
+    def evaluate(self, test_data):
+        results = [(np.argmax(self.feedforward(x)), y) for x, y in test_data]
+        return sum(int(x == y) for x, y in results)
+
 
 def sigmoid(x):
     return 1.0/(1.0 + np.exp(-x))
