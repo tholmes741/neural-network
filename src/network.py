@@ -28,12 +28,8 @@ class Network:
             a = sigmoid(np.dot(w, a) + b)
         return a
 
-    def SGD(self, training_data, batch_size, epochs, training_rate, test_data=None):
+    def SGD(self, training_data, batch_size, epochs, training_rate):
         """we gon be doing a lot of stuff"""
-        if test_data:
-            print("Network initial performance: {0}/{1} right!"
-                .format(self.evaluate(test_data), len(test_data)))
-
         n = len(training_data)
         for j in range(epochs):
             random.shuffle(training_data)
@@ -41,10 +37,6 @@ class Network:
             for batch in batches:
                 self.update_batch(batch, training_rate)
             print("Epoch {} completed".format(j + 1))
-
-        if test_data:
-            print("How does our network perform now? {0}/{1} right!" 
-                .format(self.evaluate(test_data), len(test_data)))
 
     def update_batch(self, batch, training_rate):
         new_biases = [np.zeros(b.shape) for b in self.biases]
