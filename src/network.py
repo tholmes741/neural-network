@@ -29,7 +29,7 @@ class Network:
         return a
 
     def SGD(self, training_data, batch_size, epochs, training_rate):
-        """we gon be doing a lot of stuff"""
+        """We gon be doing a lot of stuff"""
         n = len(training_data)
         for j in range(epochs):
             random.shuffle(training_data)
